@@ -8,11 +8,10 @@ type Song = {
 }
 
 type InputProps = {
-    songQueue: Song[],
     setSongQueue: React.Dispatch<React.SetStateAction<Song[]>>;
 }
 
-export function FileSystem({songQueue, setSongQueue}: InputProps) {
+export function FileSystem({setSongQueue}: InputProps) {
     const [directoryInput, setDirectoryInput] = useState("");
     const [directory, setDirectory] = useState<String[]>([]);
     const [filteredDirectory, setFilteredDirectory] = useState<String[]>([]);
@@ -80,9 +79,15 @@ export function FileSystem({songQueue, setSongQueue}: InputProps) {
     function getSongObject(length: number, path:string) {
     let mins = Math.floor(length/60);
     let secs = length % 60;
+    let song_length;
+    if(secs < 10) {
+      song_length = mins + ": 0" + secs
+    } else {
+      song_length = mins + ": " + secs
+    }
     let li = path.lastIndexOf("\\");
     let s_name = path.substring(li + 1);
-    return {name: s_name, length : mins + ": " + secs};
+    return {name: s_name, length : song_length};
   } 
 
     async function playFile(path: string) {
@@ -94,25 +99,16 @@ export function FileSystem({songQueue, setSongQueue}: InputProps) {
   }
 
     return (
-        <div className = "w-fit max-w-1/4 h-full bg-zinc-800 min-w-44 flex flex-col flex-nowrap">
-        {/* <form onSubmit={(e) => {
-          e.preventDefault();
-          queryForFiles(directoryInput);
-        }} className="w-fit">
-            <input className="w-fit text-2xl m-1" type="text" onChange={(e) => setDirectoryInput(e.currentTarget.value)}
-          placeholder="Enter a directory..." />
-            {/* <button type="submit">Greet</button> 
-        </form> */}
-        {!showFiles && <div className="min-h-6 min-w-10 bg-zinc-300 text-zinc-950 hover:bg-zinc-900 hover:text-zinc-200" onClick={initPath}>
-          <h1>Open File Directory</h1>
-        </div>}
-        {showFiles && <div className="min-h-6 min-w-10 bg-zinc-300 text-zinc-950 hover:bg-zinc-900 hover:text-zinc-200" onClick={backPath}>
-          <h1>Back</h1>
-        </div>}
-        {filteredDirectory.map((item, index) => (
-          <div className="min-w-full h-6 bg-zinc-900 hover:bg-zinc-300 text-zinc-200 hover:text-zinc-950" key = {index} onClick={() => handleFileOpen(item)}>{item}</div>
-        ))}
-        
+        <div className = "h-full min-h-8 bg-zinc-800 w-3/12 flex flex-col flex-nowrap">
+          {!showFiles && <div className="transition-all duration-300 ease-in-out text-lg min-h-12 min-w-10 bg-zinc-300 text-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 items-center flex justify-center hover:text-2xl" onClick={initPath}>
+            <h1>Open Files</h1>
+          </div>}
+          {showFiles && <div className="transition-all duration-300 ease-in-out text-lg min-h-12 min-w-10 bg-zinc-300 text-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 items-center flex justify-center hover:text-2xl" onClick={backPath}>
+            <h1>Back</h1>
+          </div>}
+          {filteredDirectory.map((item, index) => (
+            <div className="transition-all duration-300 ease-in-out min-w-full rounded-md text-m h-8 bg-zinc-900 hover:bg-zinc-300 text-zinc-200 hover:text-zinc-950 hover:text-lg hover:h-12 mt-0.5 pl-3 items-center flex overflow-hidden" key = {index} onClick={() => handleFileOpen(item)}>{item}</div>
+          ))}
       </div>
     )
 }

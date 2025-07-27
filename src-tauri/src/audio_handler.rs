@@ -71,11 +71,13 @@ pub fn play_song(app: tauri::AppHandle, file_path: &str, state: State<AudioState
 }
 
 #[tauri::command]
-pub fn skip_song(state: State<AudioState>) {
+pub fn skip_song(state: State<AudioState>, num_times: i64) {
     info!("Passed through to backend, attempting to skip .mp3 file");
     let binding = state.0.lock().unwrap();
     let sink = binding.audio_sink.as_ref().unwrap();
-    sink.skip_one();
+    for i in 1..=num_times {
+        sink.skip_one();
+    }
 }
 
 #[tauri::command]

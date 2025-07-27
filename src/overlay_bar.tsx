@@ -55,7 +55,7 @@ const OverLayBar = () =>  {
     }
     };
     return (
-    <div className = "bg-zinc-900 h-fit flex items-center justify-start p-0.5 pl-2 ">
+    <div className = "bg-zinc-900 h-[4%] flex items-center justify-start p-0.5 pl-2 ">
         <h1 className = "text-l font-sans mr-4">GigaHertz</h1>
         <div className="w-full flex justify-end" data-tauri-drag-region>
             <div
