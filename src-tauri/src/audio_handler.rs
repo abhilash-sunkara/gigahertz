@@ -44,7 +44,22 @@ pub fn set_audio_sink(state: State<AudioState>) {
 }
 
 #[tauri::command]
-pub fn set_audio_device(state: State<AudioState>) {
+pub fn get_audio_devices() -> Vec<String>{
+    let host = cpal::default_host();
+    let mut devices = match host.output_devices() {
+        Ok(v) => v,
+        Err(_e) => return Vec::new(),
+    };
+    let mut string_collect:Vec<String> = Vec::new();
+    for d in devices{
+        string_collect.push(d.name().unwrap());
+    }
+
+    return string_collect;
+}
+
+#[tauri::command]
+pub fn set_audio_device(state: State<AudioState>, index: i32) {
     info!("Passed through to backend");
     let host = cpal::default_host();
     let mut devices = match host.output_devices() {
@@ -52,7 +67,7 @@ pub fn set_audio_device(state: State<AudioState>) {
         Err(_e) => return,
     };
 
-    let d = devices.nth(0).expect("device not found at index 0");
+    let d = devices.nth(index.try_into().unwrap()).expect("device not found at index 0");
     let mut current_state = state.0.lock().unwrap();
     current_state.device = Some(d)
 }

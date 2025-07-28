@@ -10,11 +10,14 @@ import { info } from "tauri-plugin-log-api";
 
 type Song = {
   name: String,
-  length: String
+  length: String,
+  path: String
 }
 
 function App() {
   const [songQueue, setSongQueue] = useState<Song[]>([]);
+  const [audioDeviceList, setAudioDeviceList] = useState<String[]>([]);
+  const [showDevices, setShowDevices] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const hasInitialized = useRef(false);
 
@@ -74,8 +77,15 @@ function App() {
 
   async function createAudioHandler() {
     /* info("function ran on mount"); */
-    await invoke("set_audio_device", {});
+    setAudioDeviceList(await invoke<String[]>("get_audio_devices", {}));
+    await invoke("set_audio_device", {index : 0});
     await invoke("set_audio_sink", {});
+  }
+
+  async function setAudioDevice(index: number){
+    await invoke("set_audio_device", {index: index});
+    await invoke("set_audio_sink", {});
+    songQueue.forEach((s) => {invoke ("play_song", {filePath : s.path})})
   }
 
   return (
@@ -105,7 +115,6 @@ function App() {
                 <MdSkipNext size = {36}/>
               </div>
             </div>
-            
           </div>
         </div>
         <div className="h-full w-3/12 bg-zinc-800">
@@ -115,6 +124,12 @@ function App() {
               <h1>{item.length}</h1>
             </div>
           )) }
+          <div className="transition-all text-zinc-900 text-lg hover:text-zinc-100 duration-300 ease-in-out w-full h-fit py-3 mt-4 bg-violet-300 flex justify-center items-center hover:bg-zinc-900 hover:text-2xl" onClick={() => {setShowDevices(!showDevices)}}>Show Devices</div>
+          {showDevices && audioDeviceList.map((item, index) => (
+            <div key = {index} className="w-full h-fit py-3 bg-zinc-900 text-zinc-200 justify-between flex items-center px-4 mt-0.5 transition-all duration-300 ease-in-out hover:bg-violet-300 hover:text-zinc-950 hover:text-lg" onClick={() => {setAudioDevice(index)}}>
+              <h1>{item}</h1>
+            </div>
+          )) }
         </div>
       </div>
     </main>
@@ -122,3 +137,5 @@ function App() {
 }
 
 export default App;
+
+

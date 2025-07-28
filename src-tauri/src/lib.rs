@@ -13,6 +13,7 @@ use audio_handler::play_song;
 use audio_handler::pause_song;
 use audio_handler::unpause_song;
 use audio_handler::skip_song;
+use audio_handler::get_audio_devices;
 use audio_handler::AudioState;
 
 use file_system::list_files;
@@ -34,6 +35,7 @@ pub fn run() {
             Target::new(TargetKind::Webview),
         ]).build())
         .invoke_handler(tauri::generate_handler![
+            get_audio_devices,
             set_audio_sink,
             set_audio_device,
             list_files,

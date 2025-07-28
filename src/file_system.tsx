@@ -4,7 +4,8 @@ import { info } from "tauri-plugin-log-api";
 
 type Song = {
   name: String,
-  length: String
+  length: String,
+  path: String,
 }
 
 type InputProps = {
@@ -87,7 +88,7 @@ export function FileSystem({setSongQueue}: InputProps) {
     }
     let li = path.lastIndexOf("\\");
     let s_name = path.substring(li + 1);
-    return {name: s_name, length : song_length};
+    return {name: s_name, length : song_length, path : path};
   } 
 
     async function playFile(path: string) {
@@ -107,7 +108,7 @@ export function FileSystem({setSongQueue}: InputProps) {
             <h1>Back</h1>
           </div>}
           {filteredDirectory.map((item, index) => (
-            <div className="transition-all duration-300 ease-in-out min-w-full rounded-md text-m h-8 bg-zinc-900 hover:bg-zinc-300 text-zinc-200 hover:text-zinc-950 hover:text-lg hover:h-12 mt-0.5 pl-3 items-center flex overflow-hidden" key = {index} onClick={() => handleFileOpen(item)}>{item}</div>
+            <div className="transition-all duration-300 ease-in-out min-w-full rounded-md text-m h-fit bg-zinc-900 hover:bg-zinc-300 text-zinc-200 hover:text-zinc-950 hover:text-lg mt-0.5 pl-3 py-3 items-center flex overflow-hidden" key = {index} onClick={() => handleFileOpen(item)}>{item}</div>
           ))}
       </div>
     )
