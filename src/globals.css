@@ -96,10 +96,10 @@ button:active {
   background-color: #e8e8e8;
 } */
 
-input,
+/* input,
 button {
   outline: none;
-}
+} */
 
 #greet-input {
   margin-right: 5px;

@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import {useEffect, useState } from "react";
 import { info } from "tauri-plugin-log-api";
+import { Mode } from "./app";
 
 type Song = {
   name: String,
@@ -9,10 +10,13 @@ type Song = {
 }
 
 type InputProps = {
-    setSongQueue: React.Dispatch<React.SetStateAction<Song[]>>;
+    setSongQueue: React.Dispatch<React.SetStateAction<Song[]>>,
+    appMode: Mode,
+    shouldReloadFiles: boolean,
+    setShouldReloadFiles: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export function FileSystem({setSongQueue}: InputProps) {
+export function FileSystem({setSongQueue, appMode, shouldReloadFiles, setShouldReloadFiles}: InputProps) {
     const [directoryInput, setDirectoryInput] = useState("");
     const [directory, setDirectory] = useState<String[]>([]);
     const [filteredDirectory, setFilteredDirectory] = useState<String[]>([]);
@@ -20,7 +24,7 @@ export function FileSystem({setSongQueue}: InputProps) {
 
     function backPath() {
         let current_directory = directoryInput;
-        let li = current_directory.lastIndexOf('\\');
+        let li = current_directory.lastIndexOf('/');
         current_directory = current_directory.substring(0, li);
         /* info(current_directory); */
         if(current_directory.length != 0){
@@ -34,9 +38,19 @@ export function FileSystem({setSongQueue}: InputProps) {
         }
     }
 
+    useEffect(() => {
+      if(shouldReloadFiles == true){
+        console.log("trying to reload files")
+        queryForFiles(directoryInput);
+        setShouldReloadFiles(false);
+      }
+    }, [shouldReloadFiles])
+
     function filter_for_dirs_mp3(s:String): boolean {
     if(s.includes(".")){
       if(s.slice(-4) == ".mp3"){
+        return true;
+      } else if (s.slice(-5) == ".json"){
         return true;
       }
       return false;
@@ -56,8 +70,8 @@ export function FileSystem({setSongQueue}: InputProps) {
 
     function initPath() {
         console.log("opening fs")
-    queryForFiles("\\Users");
-    setDirectoryInput("\\Users");
+    queryForFiles("/Users");
+    setDirectoryInput("/Users");
     setShowFiles(true)
   }
 
@@ -65,15 +79,26 @@ export function FileSystem({setSongQueue}: InputProps) {
     setDirectory(await invoke<String[]>("list_files", {path}));
   }
 
+  async function openPlaylist(filePath:string){
+    let s:String[] = await invoke<String[]>("get_playlist", {path: filePath});
+    console.log(s)
+    for(const _s of s) {
+      await playFile(_s.toString());
+    }
+  }
+
   function handleFileOpen(addPath: String) {
       if(!addPath.includes(".")){
         /* console.log("opened folder"); */
-        queryForFiles(directoryInput + "\\" + addPath);
-        setDirectoryInput(directoryInput + "\\" + addPath);
-      } else {
+        queryForFiles(directoryInput + "/" + addPath);
+        setDirectoryInput(directoryInput + "/" + addPath);
+      } else if(addPath.slice(-4) == ".mp3") {
         /* console.log("opened .mp3"); */
-        info(directoryInput + "\\" +  addPath);
-        playFile(directoryInput + "\\" +  addPath)
+        console.log(directoryInput + "/" + addPath);
+        info(directoryInput + "/" +  addPath);
+        playFile(directoryInput + "/" +  addPath)
+      } else if(addPath.slice(-5) == ".json") {
+        openPlaylist(directoryInput + "/" +  addPath)
       }
     }
 
@@ -86,18 +111,26 @@ export function FileSystem({setSongQueue}: InputProps) {
     } else {
       song_length = mins + ": " + secs
     }
-    let li = path.lastIndexOf("\\");
+    let li = path.lastIndexOf("/");
     let s_name = path.substring(li + 1);
     return {name: s_name, length : song_length, path : path};
   } 
 
     async function playFile(path: string) {
-    /* console.log("opened path: " + path); */
-    let song_length: number = await invoke ("play_song", {filePath : path})
-    const newSong = getSongObject(song_length, path);
+      console.log("opened path: " + path);
 
-    setSongQueue(prevQueue => [...prevQueue, newSong]);
-  }
+      let newSong:Song;
+
+      if(appMode == Mode.PlaySongs){
+        let song_length: number = await invoke ("play_song", {filePath : path})
+        newSong = getSongObject(song_length, path);
+      } else {
+        let song_length: number = await invoke ("get_song_length", {filePath : path})
+        newSong = getSongObject(song_length, path);
+      }
+      
+      setSongQueue(prevQueue => [...prevQueue, newSong]);
+    }
 
     return (
         <div className = "h-full min-h-8 bg-zinc-800 w-3/12 flex flex-col flex-nowrap">

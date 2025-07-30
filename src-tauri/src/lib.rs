@@ -5,6 +5,7 @@ use tauri_plugin_log::{Target, TargetKind};
 pub mod audio_handler;
 pub mod file_system;
 pub mod source_with_fn;
+pub mod playlist;
 
 
 use audio_handler::set_audio_sink;
@@ -14,11 +15,13 @@ use audio_handler::pause_song;
 use audio_handler::unpause_song;
 use audio_handler::skip_song;
 use audio_handler::get_audio_devices;
+use audio_handler::get_song_length;
 use audio_handler::AudioState;
 
 use file_system::list_files;
 
-
+use playlist::get_playlist;
+use playlist::create_playlist;
 
 
 use std::sync::Mutex;
@@ -42,7 +45,10 @@ pub fn run() {
             play_song,
             pause_song,
             unpause_song,
-            skip_song
+            skip_song,
+            get_playlist,
+            get_song_length,
+            create_playlist
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

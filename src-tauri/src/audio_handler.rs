@@ -73,6 +73,16 @@ pub fn set_audio_device(state: State<AudioState>, index: i32) {
 }
 
 #[tauri::command]
+pub fn get_song_length(app: tauri::AppHandle, file_path: &str) -> u64 {
+    info!("Passed through to backend, attempting to check length of .mp3 file");
+    let file = File::open(file_path).unwrap();
+    let song = Decoder::try_from(file).unwrap();
+    let wrapped_source = SourceWithFn::wrap(song, move || app.emit("audio-ended", ()).unwrap());
+    let length = wrapped_source.total_duration().unwrap().as_secs();
+    return length;
+}
+
+#[tauri::command]
 pub fn play_song(app: tauri::AppHandle, file_path: &str, state: State<AudioState>) -> u64 {
     info!("Passed through to backend, attempting to play .mp3 file");
     let file = File::open(file_path).unwrap();
