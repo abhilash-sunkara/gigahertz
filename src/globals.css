@@ -136,3 +136,8 @@ html, body, #root {
 .no-drag-region {
   -webkit-app-region: no-drag;
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}

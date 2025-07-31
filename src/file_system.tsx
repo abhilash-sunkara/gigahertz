@@ -133,16 +133,18 @@ export function FileSystem({setSongQueue, appMode, shouldReloadFiles, setShouldR
     }
 
     return (
-        <div className = "h-full min-h-8 bg-zinc-800 w-3/12 flex flex-col flex-nowrap">
+        <div className = "h-full min-h-8 bg-zinc-800 w-3/12 flex flex-col">
           {!showFiles && <div className="transition-all duration-300 ease-in-out text-lg min-h-12 min-w-10 bg-zinc-300 text-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 items-center flex justify-center hover:text-2xl" onClick={initPath}>
             <h1>Open Files</h1>
           </div>}
           {showFiles && <div className="transition-all duration-300 ease-in-out text-lg min-h-12 min-w-10 bg-zinc-300 text-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 items-center flex justify-center hover:text-2xl" onClick={backPath}>
             <h1>Back</h1>
           </div>}
+          <div className="flex-1 overflow-y-scroll scrollbar-hide scroll-smooth">
           {filteredDirectory.map((item, index) => (
             <div className="transition-all duration-300 ease-in-out min-w-full rounded-md text-m h-fit bg-zinc-900 hover:bg-zinc-300 text-zinc-200 hover:text-zinc-950 hover:text-lg mt-0.5 pl-3 py-3 items-center flex overflow-hidden" key = {index} onClick={() => handleFileOpen(item)}>{item}</div>
           ))}
+          </div>
       </div>
     )
 }

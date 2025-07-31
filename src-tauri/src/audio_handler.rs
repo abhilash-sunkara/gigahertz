@@ -121,4 +121,11 @@ pub fn unpause_song(state: State<AudioState>) {
     sink.play();
 }
 
+#[tauri::command]
+pub fn set_volume(state: State<AudioState>, volume: f32) {
+    let binding = state.0.lock().unwrap();
+    let sink = binding.audio_sink.as_ref().unwrap();
+    sink.set_volume(volume);
+}
+
 

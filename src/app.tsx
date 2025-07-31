@@ -112,14 +112,14 @@ function App() {
   }
 
   return (
-    <main className="w-full h-full bg-zinc-700" style = {{overflow : "hidden"}}>
+    <main className="w-full h-screen flex flex-col bg-zinc-700 overflow-hidden">
       <OverLayBar/>
       {/* <button onClick={() => {add_sine_to_sink()}}>sine</button>
       <button onClick={() => {add_saw_to_sink()}}>saw</button>
       <button onClick={() => {add_square_to_sink()}}>square</button> */}
-      <div className="w-full h-full flex">
+      <div className="w-full flex-1 flex overflow-y-auto">
         <FileSystem setSongQueue={setSongQueue} appMode={appMode} shouldReloadFiles = {shouldReloadFiles} setShouldReloadFiles={setShouldReloadFiles}/>
-        <div className="h-full w-full flex flex-col">
+        <div className="h-full w-full flex flex-col justify-between">
           <div className = "w-full h-[87.666666666%]">
             <div className = "w-full h-12  flex flex-row">
               <div className="transition-all duration-300 ease-in-out w-1/2 h-12 bg-zinc-200 flex items-center justify-center text-xl text-zinc-900 hover:bg-violet-500 hover:text-2xl" onClick={() => {setAppMode(Mode.PlaySongs)}}>
