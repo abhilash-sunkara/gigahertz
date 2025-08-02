@@ -53,6 +53,8 @@ export function FileSystem({setSongQueue, appMode, shouldReloadFiles, setShouldR
         return true;
       } else if (s.slice(-5) == ".json"){
         return true;
+      } else if (s.slice(-4) == ".wav"){
+        return true;
       }
       return false;
     }
@@ -94,6 +96,11 @@ export function FileSystem({setSongQueue, appMode, shouldReloadFiles, setShouldR
         queryForFiles(directoryInput + "/" + addPath);
         setDirectoryInput(directoryInput + "/" + addPath);
       } else if(addPath.slice(-4) == ".mp3") {
+        /* console.log("opened .mp3"); */
+        console.log(directoryInput + "/" + addPath);
+        info(directoryInput + "/" +  addPath);
+        playFile(directoryInput + "/" +  addPath)
+      } else if(addPath.slice(-4) == ".wav") {
         /* console.log("opened .mp3"); */
         console.log(directoryInput + "/" + addPath);
         info(directoryInput + "/" +  addPath);

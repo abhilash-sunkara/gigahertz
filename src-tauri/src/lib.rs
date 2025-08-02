@@ -17,6 +17,7 @@ use audio_handler::skip_song;
 use audio_handler::get_audio_devices;
 use audio_handler::get_song_length;
 use audio_handler::set_volume;
+use audio_handler::seek_in_music;
 use audio_handler::AudioState;
 
 use file_system::list_files;
@@ -50,7 +51,8 @@ pub fn run() {
             get_playlist,
             get_song_length,
             create_playlist,
-            set_volume
+            set_volume,
+            seek_in_music
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

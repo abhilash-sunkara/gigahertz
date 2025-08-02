@@ -4,6 +4,7 @@ import { MdOutlinePauseCircleFilled, MdOutlinePlayCircleFilled, MdSkipNext, MdSk
 
 import { Song } from "./file_system";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { invoke } from "@tauri-apps/api/core";
 
 type InputProps = {
     skipSong : (i: number) => {},
@@ -40,18 +41,17 @@ export function PlayBar({skipSong, handlePause, isPaused, songQueue} : InputProp
         }
     }, [songQueue]);
 
-
-
     const [songProgress, setSongProgress] = useState(0);
-
     const [songLength, setSongLength] = useState(100);
 
      useEffect(() => {
         console.log(songLength)
     }, [songLength]);
 
-    function handleProgressChange(_: Event, newValue: number | number[]) {
-     setSongProgress(Array.isArray(newValue) ? newValue[0] : newValue);
+    function handleProgressChange(_: React.SyntheticEvent | Event, newValue: number | number[]) {
+        console.log("changing song progress")
+        setSongProgress(Array.isArray(newValue) ? newValue[0] : newValue);
+        invoke("seek_in_music", {position : Array.isArray(newValue) ? newValue[0] : newValue})
     }
 
     function incrementSongProgress(){
@@ -87,7 +87,7 @@ export function PlayBar({skipSong, handlePause, isPaused, songQueue} : InputProp
                         step = {2}
                         color="secondary"
                         value = {songProgress}
-                        onChange={handleProgressChange}
+                        onChangeCommitted={handleProgressChange}
                         disabled = {!isPausedRef}
                     />
                 </ThemeProvider>

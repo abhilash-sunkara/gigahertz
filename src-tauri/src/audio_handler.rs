@@ -6,6 +6,7 @@ use tauri::{State, AppHandle};
 use log::info;
 use std::sync::Mutex;
 use std::fs::File;
+use std::time::Duration;
 use tauri::Manager;
 
 use crate::source_with_fn::SourceWithFn;
@@ -126,6 +127,16 @@ pub fn set_volume(state: State<AudioState>, volume: f32) {
     let binding = state.0.lock().unwrap();
     let sink = binding.audio_sink.as_ref().unwrap();
     sink.set_volume(volume);
+}
+
+#[tauri::command]
+pub fn seek_in_music(state: State<AudioState>, position : u64){
+    let binding = state.0.lock().unwrap();
+    let sink = binding.audio_sink.as_ref().unwrap();
+    match sink.try_seek(Duration::new(position, 0)) {
+        Ok(_) => {},
+        Err(e) => info!("{}", e),
+    }
 }
 
 
