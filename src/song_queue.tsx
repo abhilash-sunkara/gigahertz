@@ -19,7 +19,7 @@ type InputProps = {
 const customTheme = createTheme({
       palette: {
         secondary: {
-          main: '#7c3aed', // Your custom color
+          main: '#7c3aed',
           light: '#c4b5fd',
           dark: '#2e1065',
           contrastText: '#fff',
@@ -31,10 +31,10 @@ export function SongQueue({songQueue, setSongQueue, audioDeviceList, showDevices
 
     const volumeMarks = [{value: 0, label: '0'}, {value: 100, label: '100'}, {value: 200, label: '200'}]
 
-
     const [volume, setVolume] = useState(100)
 
     function handleVolumeChange(event: Event, newValue: number){
+        console.log(event)
         console.log("new volume: " + newValue / 100)
         setVolume(newValue);
         invoke("set_volume", {volume: newValue / 100})

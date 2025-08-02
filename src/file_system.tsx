@@ -3,10 +3,11 @@ import {useEffect, useState } from "react";
 import { info } from "tauri-plugin-log-api";
 import { Mode } from "./app";
 
-type Song = {
+export type Song = {
   name: String,
   length: String,
   path: String,
+  rawLength: number
 }
 
 type InputProps = {
@@ -113,7 +114,7 @@ export function FileSystem({setSongQueue, appMode, shouldReloadFiles, setShouldR
     }
     let li = path.lastIndexOf("/");
     let s_name = path.substring(li + 1);
-    return {name: s_name, length : song_length, path : path};
+    return {name: s_name, length : song_length, path : path, rawLength : length};
   } 
 
     async function playFile(path: string) {
@@ -148,5 +149,3 @@ export function FileSystem({setSongQueue, appMode, shouldReloadFiles, setShouldR
       </div>
     )
 }
-
-export type {Song};
