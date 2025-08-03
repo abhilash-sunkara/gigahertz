@@ -18,6 +18,7 @@ export enum Mode {
 
 function App() {
   const [songQueue, setSongQueue] = useState<Song[]>([]);
+  const [prevSongQueue, setPrevSongQueue] = useState<Song[]>([]);
   const [audioDeviceList, setAudioDeviceList] = useState<String[]>([]);
   const [audioDeviceIndex, setAudioDeviceIndex] = useState(0);
   const [showDevices, setShowDevices] = useState(false);
@@ -28,8 +29,22 @@ function App() {
   const hasInitialized = useRef(false);
 
   function removeTopSongFromQueue() {
-    setSongQueue(prevQueue => prevQueue.slice(1));
+     setSongQueue(prevQueue => {
+    const [top, ...rest] = prevQueue;
+    if (!top) {
+      console.log("No song to move.");
+      return prevQueue;
+    }
+
+    setPrevSongQueue(ps => [...ps, top]);
+    return rest;
+  });
   }
+
+  useEffect(() => {
+    console.log("edited prev song queue");
+    console.log(prevSongQueue);
+  }, [prevSongQueue])
 
   /* const unlisten = getCurrentWindow().listen('audio-ended', () => {
     console.log(`Ended song`);
@@ -56,9 +71,26 @@ function App() {
   async function skipSong(numTimes: number) {
     info("attempting to skip this many times: " + numTimes)
     console.log("attempting to skip this many times: " + numTimes)
-    await invoke("skip_song", {numTimes : numTimes});
-    for(let i = 0; i < numTimes; i++){
-      removeTopSongFromQueue();
+    if(numTimes > 0){
+      await invoke("skip_song", {numTimes : numTimes});
+      for(let i = 0; i < numTimes; i++){
+        removeTopSongFromQueue();
+      }
+    } else if (numTimes < 0 && prevSongQueue.length > 0) {
+      const topSong = prevSongQueue[prevSongQueue.length - 1];
+      if (!topSong) return;
+
+      const newPrevQueue = prevSongQueue.slice(0, -1);
+      const newSongQueue = [topSong, ...songQueue];
+
+      setPrevSongQueue(newPrevQueue);
+      setSongQueue(newSongQueue);
+
+      await invoke("clear_sink");
+      for (const song of newSongQueue) {
+        await invoke("play_song", { filePath: song.path });
+      }
+      await invoke("unpause_song");
     }
   }
 

@@ -8,16 +8,7 @@ pub mod source_with_fn;
 pub mod playlist;
 
 
-use audio_handler::set_audio_sink;
-use audio_handler::set_audio_device;
-use audio_handler::play_song;
-use audio_handler::pause_song;
-use audio_handler::unpause_song;
-use audio_handler::skip_song;
-use audio_handler::get_audio_devices;
-use audio_handler::get_song_length;
-use audio_handler::set_volume;
-use audio_handler::seek_in_music;
+use audio_handler::{set_audio_sink, set_audio_device, play_song, pause_song, unpause_song, skip_song, get_audio_devices, get_song_length, set_volume, seek_in_music, clear_sink};
 use audio_handler::AudioState;
 
 use file_system::list_files;
@@ -52,7 +43,8 @@ pub fn run() {
             get_song_length,
             create_playlist,
             set_volume,
-            seek_in_music
+            seek_in_music, 
+            clear_sink
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

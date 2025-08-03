@@ -101,7 +101,7 @@ pub fn skip_song(state: State<AudioState>, num_times: i64) {
     info!("Passed through to backend, attempting to skip .mp3 file");
     let binding = state.0.lock().unwrap();
     let sink = binding.audio_sink.as_ref().unwrap();
-    for i in 1..=num_times {
+    for _i in 1..=num_times {
         sink.skip_one();
     }
 }
@@ -139,4 +139,9 @@ pub fn seek_in_music(state: State<AudioState>, position : u64){
     }
 }
 
-
+#[tauri::command]
+pub fn clear_sink(state: State<AudioState>){
+    let binding = state.0.lock().unwrap();
+    let sink = binding.audio_sink.as_ref().unwrap();
+    sink.clear();
+}
