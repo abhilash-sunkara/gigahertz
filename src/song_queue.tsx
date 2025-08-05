@@ -1,5 +1,5 @@
 import { info } from "tauri-plugin-log-api";
-import { Song } from "./file_system";
+import { Song } from "./app";
 import { invoke } from "@tauri-apps/api/core";
 import { createTheme, Slider, ThemeProvider } from "@mui/material";
 import { useState } from "react";
@@ -68,7 +68,7 @@ export function SongQueue({songQueue, setSongQueue, audioDeviceList, showDevices
             <div>
                 {songQueue.map((item, index) => (
                     <div key = {index} className="w-full h-8 bg-zinc-900 text-zinc-200 justify-between flex items-center px-4 mt-0.5 transition-all duration-300 ease-in-out hover:bg-violet-300 hover:text-zinc-950 hover:text-lg hover:h-12" onClick={() => {skipSong(index)}}>
-                    <h1>{item.name}</h1>
+                    <h1>{item.rawName}</h1>
                     <h1>{item.length}</h1>
                     </div>
                 )) }
@@ -77,7 +77,7 @@ export function SongQueue({songQueue, setSongQueue, audioDeviceList, showDevices
                 </div>
                 <div className="transition-all text-zinc-900 text-lg hover:text-zinc-100 duration-300 ease-in-out w-full h-fit py-3 bg-violet-300 flex justify-center items-center hover:bg-zinc-900 hover:text-2xl" onClick={() => {setShowDevices(!showDevices)}}>Show Devices</div>
                 {showDevices && audioDeviceList.map((item, index) => (
-                    <div key = {index} className="w-full h-fit py-3 bg-zinc-900 text-zinc-200 justify-between flex items-center px-4 mt-0.5 transition-all duration-300 ease-in-out hover:bg-violet-300 hover:text-zinc-950 hover:text-lg" onClick={() => {setAudioDevice(index)}}>
+                    <div key = {index} className="w-full h-fit py-3 bg-zinc-900 text-zinc-200 justify-between flex items-center px-4 mt-0.5 transition-all duration-300 ease-in-out hover:bg-violet-300 hover:text-zinc-950 hover:text-lg" onClick={() => {setAudioDevice(index); setShowDevices(false)}}>
                     <h1>{item}</h1>
                     </div>
                 )) }

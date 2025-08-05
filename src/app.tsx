@@ -4,16 +4,36 @@ import OverLayBar from "./overlay_bar";
 import { useRef, useState } from "react";
 import { useEffect } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { FileSystem, Song } from "./file_system";
+import { FileSystem} from "./file_system";
 import { info } from "tauri-plugin-log-api";
 import { SongQueue } from "./song_queue";
 import { PlaylistBar } from "./playlist_bar";
 import { PlayBar } from "./play_bar";
 import { AppModeBar } from "./app_mode_bar";
+import { SongInfoWindow } from "./song_info_window";
 
 export enum Mode {
   PlaySongs,
-  CreatePlaylist
+  CreatePlaylist,
+  CreateSongInfo
+}
+
+export type Song = {
+  rawName: String,
+  name: String,
+  artist: String,
+  genre: String,
+  length: String,
+  path: String,
+  rawLength: number,
+  hasMetadata: boolean
+}
+
+export type SongMetadata = {
+  path : String,
+  name : String, 
+  artist : String,
+  genre : String
 }
 
 function App() {
@@ -27,6 +47,10 @@ function App() {
   const [playlistName, setPlaylistName] = useState("");
   const [shouldReloadFiles, setShouldReloadFiles] = useState(false);
   const hasInitialized = useRef(false);
+  const [songNameMetadata, setSongNameMetadata] = useState("")
+  const [songPathMetadata, setSongPathMetadata] = useState("")
+  const [songArtistMetadata, setSongArtistMetadata] = useState("")
+  const [songGenreMetadata, setSongGenreMetadata] = useState("")
 
   function removeTopSongFromQueue() {
      setSongQueue(prevQueue => {
@@ -39,6 +63,26 @@ function App() {
     setPrevSongQueue(ps => [...ps, top]);
     return rest;
   });
+  }
+
+  async function createGHSFile() {
+    let metadataObject: SongMetadata = {
+      path : songPathMetadata,
+      name : songNameMetadata,
+      genre : songGenreMetadata,
+      artist : songArtistMetadata
+    }
+
+    let li = songPathMetadata.lastIndexOf(".")
+
+
+    let ghsPath: string = songPathMetadata.substring(0, li) + ".ghs"
+
+    console.log(ghsPath)
+    console.log(metadataObject)
+
+    await invoke("create_song_metadata_file", {path : ghsPath, sm : metadataObject})
+    setShouldReloadFiles(true)
   }
 
   useEffect(() => {
@@ -140,13 +184,12 @@ function App() {
       <button onClick={() => {add_saw_to_sink()}}>saw</button>
       <button onClick={() => {add_square_to_sink()}}>square</button> */}
       <div className="w-full flex-1 flex overflow-y-auto">
-        <FileSystem setSongQueue={setSongQueue} appMode={appMode} shouldReloadFiles = {shouldReloadFiles} setShouldReloadFiles={setShouldReloadFiles}/>
-        <div className="h-full w-full flex flex-col justify-between">
-          <div className = "w-full h-[87.666666666%]">
-            <AppModeBar setAppMode={setAppMode}/>
-          </div>
+        <FileSystem setSongQueue={setSongQueue} appMode={appMode} shouldReloadFiles = {shouldReloadFiles} setShouldReloadFiles={setShouldReloadFiles} setSongPathMetadata={setSongPathMetadata}/>
+        <div className="h-full w-full flex flex-col">
+          <AppModeBar setAppMode={setAppMode}/>
           {appMode == Mode.PlaySongs && <PlayBar skipSong={skipSong} isPaused={isPaused} handlePause={handlePause} songQueue={songQueue}/>}
           {appMode == Mode.CreatePlaylist && <PlaylistBar createPlaylist={createPlaylist} setPlaylistName={setPlaylistName}/>}
+          {appMode == Mode.CreateSongInfo && <SongInfoWindow setSongArtist={setSongArtistMetadata} setSongGenre={setSongGenreMetadata} setSongName={setSongNameMetadata} setSongPath={setSongPathMetadata} songPathMetadata={songPathMetadata} createGHSFile={createGHSFile}/>}
         </div>
         <SongQueue songQueue={songQueue} setSongQueue={setSongQueue} audioDeviceList={audioDeviceList} showDevices = {showDevices} setShowDevices={setShowDevices} audioDeviceIndex={audioDeviceIndex} setAudioDeviceIndex={setAudioDeviceIndex}/>
       </div>

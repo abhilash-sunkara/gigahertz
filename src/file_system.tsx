@@ -1,23 +1,19 @@
 import { invoke } from "@tauri-apps/api/core";
 import {useEffect, useState } from "react";
 import { info } from "tauri-plugin-log-api";
-import { Mode } from "./app";
+import { Mode, Song, SongMetadata } from "./app";
 
-export type Song = {
-  name: String,
-  length: String,
-  path: String,
-  rawLength: number
-}
+
 
 type InputProps = {
     setSongQueue: React.Dispatch<React.SetStateAction<Song[]>>,
     appMode: Mode,
     shouldReloadFiles: boolean,
-    setShouldReloadFiles: React.Dispatch<React.SetStateAction<boolean>>
+    setShouldReloadFiles: React.Dispatch<React.SetStateAction<boolean>>,
+    setSongPathMetadata: React.Dispatch<React.SetStateAction<string>>
 }
 
-export function FileSystem({setSongQueue, appMode, shouldReloadFiles, setShouldReloadFiles}: InputProps) {
+export function FileSystem({setSongQueue, appMode, shouldReloadFiles, setShouldReloadFiles, setSongPathMetadata}: InputProps) {
     const [directoryInput, setDirectoryInput] = useState("");
     const [directory, setDirectory] = useState<String[]>([]);
     const [filteredDirectory, setFilteredDirectory] = useState<String[]>([]);
@@ -51,9 +47,11 @@ export function FileSystem({setSongQueue, appMode, shouldReloadFiles, setShouldR
     if(s.includes(".")){
       if(s.slice(-4) == ".mp3"){
         return true;
-      } else if (s.slice(-5) == ".json"){
-        return true;
       } else if (s.slice(-4) == ".wav"){
+        return true;
+      } else if (s.slice(-4) == ".ghp"){
+        return true;
+      }else if (s.slice(-4) == ".ghs"){
         return true;
       }
       return false;
@@ -86,7 +84,7 @@ export function FileSystem({setSongQueue, appMode, shouldReloadFiles, setShouldR
     let s:String[] = await invoke<String[]>("get_playlist", {path: filePath});
     console.log(s)
     for(const _s of s) {
-      await playFile(_s.toString());
+      await playFile(_s.toString(), false);
     }
   }
 
@@ -99,45 +97,75 @@ export function FileSystem({setSongQueue, appMode, shouldReloadFiles, setShouldR
         /* console.log("opened .mp3"); */
         console.log(directoryInput + "/" + addPath);
         info(directoryInput + "/" +  addPath);
-        playFile(directoryInput + "/" +  addPath)
+        playFile(directoryInput + "/" +  addPath, false)
       } else if(addPath.slice(-4) == ".wav") {
         /* console.log("opened .mp3"); */
         console.log(directoryInput + "/" + addPath);
         info(directoryInput + "/" +  addPath);
-        playFile(directoryInput + "/" +  addPath)
+        playFile(directoryInput + "/" +  addPath, false)
       } else if(addPath.slice(-5) == ".json") {
         openPlaylist(directoryInput + "/" +  addPath)
+      } else if(addPath.slice(-4) == ".ghp") {
+        openPlaylist(directoryInput + "/" +  addPath)
+      } else if(addPath.slice(-4) == ".ghs"){
+        console.log(directoryInput + "/" + addPath);
+        info(directoryInput + "/" +  addPath);
+        playFile(directoryInput + "/" +  addPath, true)
       }
     }
 
-    function getSongObject(length: number, path:string) {
-    let mins = Math.floor(length/60);
-    let secs = length % 60;
-    let song_length;
-    if(secs < 10) {
-      song_length = mins + ": 0" + secs
-    } else {
-      song_length = mins + ": " + secs
-    }
-    let li = path.lastIndexOf("/");
-    let s_name = path.substring(li + 1);
-    return {name: s_name, length : song_length, path : path, rawLength : length};
-  } 
+    const getSongObject = function(length: number, path:string): Song{
+      let mins = Math.floor(length/60);
+      let secs = length % 60;
+      let song_length;
+      if(secs < 10) {
+        song_length = mins + ": 0" + secs
+      } else {
+        song_length = mins + ": " + secs
+      }
+      let li = path.lastIndexOf("/");
+      let s_name = path.substring(li + 1);
+      return {rawName: s_name, length : song_length, path : path, rawLength : length, name : s_name, genre : "", artist : "", hasMetadata : false};
+    } 
 
-    async function playFile(path: string) {
+    const getSongObjectWithMetadata = function(length: number, path:string, md: SongMetadata): Song{
+      let mins = Math.floor(length/60);
+      let secs = length % 60;
+      let song_length;
+      if(secs < 10) {
+        song_length = mins + ": 0" + secs
+      } else {
+        song_length = mins + ": " + secs
+      }
+      let li = path.lastIndexOf("/");
+      let s_name = path.substring(li + 1);
+      return {rawName: s_name, length : song_length, path : md.path, rawLength : length, name : md.name, genre : md.genre, artist : md.artist, hasMetadata : true};
+    } 
+
+    async function playFile(path: string, hasMetadata: boolean) {
       console.log("opened path: " + path);
-
+      console.log("App mode : " + appMode);
       let newSong:Song;
 
-      if(appMode == Mode.PlaySongs){
+      if(appMode == Mode.PlaySongs && !hasMetadata){
         let song_length: number = await invoke ("play_song", {filePath : path})
         newSong = getSongObject(song_length, path);
+      } else if(appMode == Mode.PlaySongs && hasMetadata){
+        let md:SongMetadata = await invoke ("get_song_metadata", {path : path})
+        console.log(md)
+        let song_length: number = await invoke ("play_song", {filePath : md.path})
+        newSong = getSongObjectWithMetadata(song_length, path, md);
+      } else if(appMode == Mode.CreateSongInfo){
+        console.log(path)
+        setSongPathMetadata(path)
       } else {
         let song_length: number = await invoke ("get_song_length", {filePath : path})
         newSong = getSongObject(song_length, path);
       }
       
-      setSongQueue(prevQueue => [...prevQueue, newSong]);
+      if(appMode != Mode.CreateSongInfo){
+        setSongQueue(prevQueue => [...prevQueue, newSong]);
+      }
     }
 
     return (

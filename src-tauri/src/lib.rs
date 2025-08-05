@@ -6,6 +6,7 @@ pub mod audio_handler;
 pub mod file_system;
 pub mod source_with_fn;
 pub mod playlist;
+pub mod song_metadata;
 
 
 use audio_handler::{set_audio_sink, set_audio_device, play_song, pause_song, unpause_song, skip_song, get_audio_devices, get_song_length, set_volume, seek_in_music, clear_sink};
@@ -15,6 +16,9 @@ use file_system::list_files;
 
 use playlist::get_playlist;
 use playlist::create_playlist;
+
+use song_metadata::get_song_metadata;
+use song_metadata::create_song_metadata_file;
 
 
 use std::sync::Mutex;
@@ -44,7 +48,9 @@ pub fn run() {
             create_playlist,
             set_volume,
             seek_in_music, 
-            clear_sink
+            clear_sink,
+            get_song_metadata,
+            create_song_metadata_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
